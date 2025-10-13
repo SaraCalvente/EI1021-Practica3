@@ -19,8 +19,8 @@ import comun.MyStreamSocket;
 class HiloServidorSockets implements Runnable {
 
 
-	private MyStreamSocket myDataSocket;
-	private GestorReservas gestor;
+	final private MyStreamSocket myDataSocket;
+	final private GestorReservas gestor;
 
 	/**
 	 * Construye el objeto a ejecutar por la hebra para servir a un cliente
