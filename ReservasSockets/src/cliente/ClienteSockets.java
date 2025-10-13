@@ -39,7 +39,7 @@ public class ClienteSockets {
         Scanner teclado = new Scanner(System.in);
 
         String host = "localhost";  // o IP del servidor
-        int puerto = 6000;          // puerto donde escucha el servidor
+        String puerto = "6000";          // puerto donde escucha el servidor
 
         try {
             // Crea un auxiliar de cliente sockets (en lugar del gestor local)

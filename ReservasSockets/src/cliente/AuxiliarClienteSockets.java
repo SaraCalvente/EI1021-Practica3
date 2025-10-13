@@ -32,15 +32,15 @@ public class AuxiliarClienteSockets {
 	 * Construye un objeto auxiliar asociado a un cliente del servicio.
 	 * Crea un socket para conectar con el servidor.
 	 * @param	hostName	nombre de la máquina que ejecuta el servidor
-	 * @param	puerto		número de puerto asociado al servicio en el servidor
+	 * @param	portNum		número de puerto asociado al servicio en el servidor
 	 */
-	AuxiliarClienteSockets(String hostName, int puerto)
+	AuxiliarClienteSockets(String hostName, String portNum)
 			throws SocketException, UnknownHostException, IOException {
 
 		// IP del servidor
 		InetAddress serverHost = InetAddress.getByName(hostName);
 		// Puerto asociado al servicio en el servidor
-		int serverPort = (puerto);
+		int serverPort = Integer.parseInt(portNum);
 		// Instantiates a stream-mode socket and wait for a connection.
 		this.mySocket = new MyStreamSocket(serverHost, serverPort);
 		/**/  System.out.println("Hecha peticion de conexion");
@@ -48,110 +48,111 @@ public class AuxiliarClienteSockets {
 	} // end constructor
 
 
+	private JSONObject communicate(String message) {
+		String response = null;
+		JSONObject jsonResponse = new JSONObject();
+		try {
+			mySocket.sendMessage(message);
+			response = mySocket.receiveMessage();
+			if (response == "CLOSE")
+				mySocket.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			System.out.println("Error de comunicación con el servidor.");
+        }
+		if (response != null) {
+			try {
+				Object o = parser.parse(response);
+			
+				jsonResponse = (JSONObject) o;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				System.out.println("Error al parsear.");
+			}
+		}
+		
+		return jsonResponse;
+	}
 
 	@SuppressWarnings("unchecked")
 	public JSONArray listaReservasUsuario(String codUsuario) {
-	// IMPLEMENTADO
-			JSONArray jsonReservasArray = new JSONArray();
-			Vector<Reserva> vectorReservasUsuario = reservas.get(codUsuario); // Vector con todas las reservas del usuario
-			if (vectorReservasUsuario == null) return jsonReservasArray; // Si el vector es null, no tiene reservas, devolvemos vacío
-			
-			// Si no está vacío, guardamos todas las reservas del vector y devolvemos el JSONArray
-			for (Reserva reserva : vectorReservasUsuario) jsonReservasArray.add(reserva.toJSON());
-	        return jsonReservasArray;
+		// IMPLEMENTADO
+		JSONObject jsonMessage = new JSONObject();
+		jsonMessage.put("operacion", 1);
+		jsonMessage.put("codUsuario", codUsuario);
+		String message = jsonMessage.toJSONString();
+		
+		JSONObject jsonResponse = communicate(message);
+		
+		JSONArray reservasUsuario = (JSONArray) jsonResponse.get("reservasUsuario");
+		
+		return reservasUsuario; // cambiar por el retorno correcto	
 	} // end listaReservasUsuario
 	
 	@SuppressWarnings("unchecked")
 	public JSONArray listaPlazasDisponibles(String actividad) {
 		// IMPLEMENTADO
-	    JSONArray jsonPlazasDisponiblesArray = new JSONArray();
-	    for (Map.Entry<DiaSemana, Vector<Sesion>> entry : sesionesSemana.entrySet()) {
-	        for (Sesion sesion : entry.getValue()) {
-	            if (sesion.getActividad().equalsIgnoreCase(actividad) && sesion.getPlazas() > 0) {
-	                JSONObject jsonSesion = sesion.toJSON();
-	                jsonSesion.put("dia", entry.getKey().name()); // añadimos el día
-	                jsonPlazasDisponiblesArray.add(jsonSesion);
-	            }
-	        }
-	    }
-	    return jsonPlazasDisponiblesArray;
+		JSONObject jsonMessage = new JSONObject();
+		jsonMessage.put("operacion", 2);
+		jsonMessage.put("actividad", actividad);
+		String message = jsonMessage.toJSONString();
+		
+		JSONObject jsonResponse = communicate(message);
+		
+		JSONArray plazasActividad = (JSONArray) jsonResponse.get("plazasActividad");
+		return plazasActividad; // cambiar por el retorno correcto
 	} // end listaPlazasDisponibles
 
 
 	@SuppressWarnings("unchecked")
 	JSONObject hazReserva(String codUsuario, String actividad, DiaSemana dia, long hora) {
-	// IMPLEMENTADO
-			Sesion sesion = buscaSesion(actividad, dia, hora); // Buscamos la sesión
-			
-			// Si la sesión no se encuentra o no quedan plazas y devolvemos JSONObject vacío
-			if (sesion == null || sesion.getPlazas() <= 0) return new JSONObject();
-			
-			
-			// Revisamos si existe una reserva de la misma sesión creada por el mismo usuario, si existe, devolvemos JSONObject vacío
-			for (Object reservaUsuario : listaReservasUsuario(codUsuario)) {
-				JSONObject jsonReservaUsuario = (JSONObject) reservaUsuario;
-				if (actividad.equals((String) jsonReservaUsuario.get("actividad"))
-				 &&	dia == DiaSemana.valueOf((String) jsonReservaUsuario.get("dia"))
-				 && hora == (long)	jsonReservaUsuario.get("hora")) {
-					return new JSONObject();
-				}
-			}
-			
-			// Creamos la nueva reserva
-			Reserva reserva = new Reserva(codUsuario, actividad, dia, hora);
-			
-			sesion.setPlazas(sesion.getPlazas() - 1); // Decrementamos el número de plazas
-			guardaReserva(reserva); // Guardamos la reserva en el HashMap reservas
-			return reserva.toJSON();
+		// IMPLEMENTADO
+		JSONObject jsonMessage = new JSONObject();
+		jsonMessage.put("operacion", 3);
+		jsonMessage.put("codUsuario", codUsuario);
+		jsonMessage.put("actividad", actividad);
+		jsonMessage.put("dia", dia.toString());
+		jsonMessage.put("hora", hora);
+		String message = jsonMessage.toJSONString();
+		
+		JSONObject jsonResponse = communicate(message);
+		
+		JSONObject reserva = (JSONObject) jsonResponse.get("reserva");
+		return reserva; // cambiar por el retorno correcto
 	} // end hazReserva
 
 
 	@SuppressWarnings("unchecked")
 	public JSONObject modificaReserva(String codUsuario, long codReserva, DiaSemana nuevoDia, long nuevaHora) {
-	//IMPLEMENTADO
-			Vector<Reserva> reservasUsuario = reservas.get(codUsuario);
-		    Reserva r = buscaReserva(reservasUsuario, codReserva);
-		    if (r == null) return new JSONObject();
-
-		    // Buscar sesión nueva
-		    Sesion nuevaSesion = buscaSesion(r.getActividad(), nuevoDia, nuevaHora);
-		    if (nuevaSesion == null || nuevaSesion.getPlazas() <= 0) {
-		        return new JSONObject(); // No existe o no hay plazas
-		    }
-
-		    // Liberar plaza en la sesión antigua
-		    Sesion antiguaSesion = buscaSesion(r.getActividad(), r.getDia(), r.getHora());
-		    if (antiguaSesion != null) {
-		        antiguaSesion.setPlazas(antiguaSesion.getPlazas() + 1);
-		    }
-
-		    // Actualizar reserva
-		    r.setDia(nuevoDia);
-		    r.setHora(nuevaHora);
-		    nuevaSesion.setPlazas(nuevaSesion.getPlazas() - 1);
-
-		    return r.toJSON();
+		// IMPLEMENTADO
+		JSONObject jsonMessage = new JSONObject();
+		jsonMessage.put("operacion", 4);
+		jsonMessage.put("codUsuario", codUsuario);
+		jsonMessage.put("codReserva", codReserva);
+		jsonMessage.put("nuevoDia", nuevoDia.toString());
+		jsonMessage.put("nuevaHora", nuevaHora);
+		String message = jsonMessage.toJSONString();
+		
+		JSONObject jsonResponse = communicate(message);
+		
+		JSONObject reserva = (JSONObject) jsonResponse.get("reserva");
+		return reserva; // cambiar por el retorno correcto
 	} // end modificaReserva
 
 	@SuppressWarnings("unchecked")
 	public JSONObject cancelaReserva(String codUsuario, long codReserva) {
-	// IMPLEMENTADO
-			Vector<Reserva> reservasUsuario = reservas.get(codUsuario);
-		    if (reservasUsuario == null) return new JSONObject();
+		// IMPLEMENTADO
+		JSONObject jsonMessage = new JSONObject();
+		jsonMessage.put("operacion", 5);
+		jsonMessage.put("codUsuario", codUsuario);
+		jsonMessage.put("codReserva", codReserva);
+		String message = jsonMessage.toJSONString();
+		
+		JSONObject jsonResponse = communicate(message);
+		
+		JSONObject reserva = (JSONObject) jsonResponse.get("reserva");
+		return reserva; // cambiar por el retorno correcto
 
-		    Reserva r = buscaReserva(reservasUsuario, codReserva);
-		    if (r == null) return new JSONObject();
-
-		    // Liberar plaza en la sesión correspondiente
-		    Sesion sesion = buscaSesion(r.getActividad(), r.getDia(), r.getHora());
-		    if (sesion != null) {
-		        sesion.setPlazas(sesion.getPlazas() + 1);
-		    }
-
-		    // Eliminar reserva
-		    reservasUsuario.remove(r);
-
-		    return r.toJSON();
 	} // cancelaReserva
 
 
@@ -160,6 +161,11 @@ public class AuxiliarClienteSockets {
 	 */
 	@SuppressWarnings("unchecked")
 	public void cierraSesion( ) {
-		// POR IMPLEMENTAR
+		// IMPLEMENTADO
+		JSONObject jsonMessage = new JSONObject();
+		jsonMessage.put("operacion", 0);
+		String message = jsonMessage.toJSONString();
+		
+		communicate(message);
 	} // end done 
 } //end class
