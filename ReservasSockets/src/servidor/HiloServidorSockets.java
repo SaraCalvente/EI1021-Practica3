@@ -28,7 +28,8 @@ class HiloServidorSockets implements Runnable {
 	 * @param	unGestor		gestor de viajes
 	 */
 	HiloServidorSockets(MyStreamSocket myDataSocket, GestorReservas unGestor) {
-		// POR IMPLEMENTAR
+		this.myDataSocket = myDataSocket;
+	    this.gestor = unGestor;
 	}
 
 	/**
@@ -37,43 +38,71 @@ class HiloServidorSockets implements Runnable {
 	public void run( ) {
 		String operacion = "0";
 		boolean done = false;
+	    JSONParser parser = new JSONParser();
 		// ...
 		try {
 			while (!done) {
-				// Recibe una petición del cliente
-				// Extrae la operación y sus parámetros
+				String peticion = myDataSocket.receiveMessage();
+	            if (peticion == null) break; 
 
+	            JSONObject jsonPeticion = (JSONObject) parser.parse(peticion);
+	            operacion = (String) jsonPeticion.get("operacion");
+
+	            JSONObject respuesta = new JSONObject();
+	            JSONArray arrayRespuesta = new JSONArray();
 				switch (operacion) {
 				
-					case "0":
-						
-						break;
+				case "0": 
+                    done = true;
+                    break;
 
-					case "1": { // Devuelve una lista de reservas de un usuario
-						// ...
+                case "1": { // Listar reservas del usuario
+                    String codUsuario = (String) jsonPeticion.get("codUsuario");
+                    arrayRespuesta = gestor.listaReservasUsuario(codUsuario);
+                    myDataSocket.sendMessage(arrayRespuesta.toJSONString());
+                    break;
+                }
 
-						break;
-					}
-					case "2": { // Devuelve una lista de plazas disponibles de una actividad
-						// ...
+                case "2": { // Listar plazas disponibles
+                    String nombreActividad = (String) jsonPeticion.get("nombreActividad");
+                    arrayRespuesta = gestor.listaPlazasDisponibles(nombreActividad);
+                    myDataSocket.sendMessage(arrayRespuesta.toJSONString());
+                    break;
+                }
 
-						break;
-					}
-					case "3": { // Un usuario hace una reserva
-						// ...
+                case "3": { // Hacer reserva
+                    String codUsuario = (String) jsonPeticion.get("codUsuario");
+                    String nombreActividad = (String) jsonPeticion.get("nombreActividad");
+                    DiaSemana dia = DiaSemana.valueOf((String) jsonPeticion.get("dia"));
+                    long hora = (long) jsonPeticion.get("hora");
 
-						break;
-					}
-					case "4": { // Un usuario modifica una de sus reservas
-						// ...
+                    respuesta = gestor.hazReserva(codUsuario, nombreActividad, dia, hora);
+                    myDataSocket.sendMessage(respuesta.toJSONString());
+                    break;
+                }
 
-						break;
-					}
-					case "5": { // Un usuario cancela una de sus reservas
-						// ...
+                case "4": { // Modificar reserva
+                    String codUsuario = (String) jsonPeticion.get("codUsuario");
+                    long codReserva = (long) jsonPeticion.get("codReserva");
+                    DiaSemana dia = DiaSemana.valueOf((String) jsonPeticion.get("dia"));
+                    long hora = (long) jsonPeticion.get("hora");
 
-						break;
-					}
+                    respuesta = gestor.modificaReserva(codUsuario, codReserva, dia, hora);
+                    myDataSocket.sendMessage(respuesta.toJSONString());
+                    break;
+                }
+
+                case "5": { // Cancelar reserva
+                    String codUsuario = (String) jsonPeticion.get("codUsuario");
+                    long codReserva = (long) jsonPeticion.get("codReserva");
+
+                    respuesta = gestor.cancelaReserva(codUsuario, codReserva);
+                    myDataSocket.sendMessage(respuesta.toJSONString());
+                    break;
+                }
+                default:
+                    System.out.println("Operación no reconocida: " + operacion);
+                    break;
 
 				} // fin switch
 			} // fin while   

@@ -32,15 +32,15 @@ public class AuxiliarClienteSockets {
 	 * Construye un objeto auxiliar asociado a un cliente del servicio.
 	 * Crea un socket para conectar con el servidor.
 	 * @param	hostName	nombre de la máquina que ejecuta el servidor
-	 * @param	portNum		número de puerto asociado al servicio en el servidor
+	 * @param	puerto		número de puerto asociado al servicio en el servidor
 	 */
-	AuxiliarClienteSockets(String hostName, String portNum)
+	AuxiliarClienteSockets(String hostName, int puerto)
 			throws SocketException, UnknownHostException, IOException {
 
 		// IP del servidor
 		InetAddress serverHost = InetAddress.getByName(hostName);
 		// Puerto asociado al servicio en el servidor
-		int serverPort = Integer.parseInt(portNum);
+		int serverPort = (puerto);
 		// Instantiates a stream-mode socket and wait for a connection.
 		this.mySocket = new MyStreamSocket(serverHost, serverPort);
 		/**/  System.out.println("Hecha peticion de conexion");
