@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class GestorReservas {
@@ -251,7 +252,7 @@ public class GestorReservas {
 	 * @return Un `JSONArray` que contiene la representación JSON de cada reserva del usuario.
 	 */
 	@SuppressWarnings("unchecked")
-	public JSONArray listaReservasUsuario(String codUsuario) {
+	public synchronized JSONArray listaReservasUsuario(String codUsuario) {
         // IMPLEMENTADO
 		JSONArray jsonReservasArray = new JSONArray();
 		Vector<Reserva> vectorReservasUsuario = reservas.get(codUsuario); // Vector con todas las reservas del usuario
@@ -271,7 +272,7 @@ public class GestorReservas {
 	 *         Si no hay sesiones disponibles, se devuelve un JSONArray vacío.
 	 */
 	@SuppressWarnings("unchecked")
-	public JSONArray listaPlazasDisponibles(String actividad) {
+	public synchronized JSONArray listaPlazasDisponibles(String actividad) {
 		// IMPLEMENTADO
 	    JSONArray jsonPlazasDisponiblesArray = new JSONArray();
 	    for (Map.Entry<DiaSemana, Vector<Sesion>> entry : sesionesSemana.entrySet()) {
@@ -297,7 +298,7 @@ public class GestorReservas {
 	 * @return Un objeto `JSONObject` con el código de la reserva si se realizó con éxito, o vacío si no fue posible reservar.
 	 */
 	@SuppressWarnings("unchecked")
-	public JSONObject hazReserva(String codUsuario, String actividad, DiaSemana dia, long hora) {
+	public synchronized JSONObject hazReserva(String codUsuario, String actividad, DiaSemana dia, long hora) {
         // IMPLEMENTADO
 		Sesion sesion = buscaSesion(actividad, dia, hora); // Buscamos la sesión
 		
@@ -356,7 +357,7 @@ public class GestorReservas {
 	 * @param nuevaHora Nueva hora de la sesión en formato 24 horas.
 	 * @return Un `JSONObject` con la representación de la reserva modificada, o vacío si no se pudo modificar.
 	 */
-	public JSONObject modificaReserva(String codUsuario, long codReserva, DiaSemana nuevoDia, long nuevaHora) {
+	public synchronized JSONObject modificaReserva(String codUsuario, long codReserva, DiaSemana nuevoDia, long nuevaHora) {
 		//IMPLEMENTADO
 		Vector<Reserva> reservasUsuario = reservas.get(codUsuario);
 	    Reserva r = buscaReserva(reservasUsuario, codReserva);
@@ -390,7 +391,7 @@ public class GestorReservas {
 	 * @param codReserva Código único de la reserva a cancelar.
 	 * @return Un `JSONObject` con la representación de la reserva cancelada, o vacío si no se encontró.
 	 */
-	public JSONObject cancelaReserva(String codUsuario, long codReserva) {
+	public synchronized JSONObject cancelaReserva(String codUsuario, long codReserva) {
 		// IMPLEMENTADO
 		Vector<Reserva> reservasUsuario = reservas.get(codUsuario);
 	    if (reservasUsuario == null) return new JSONObject();

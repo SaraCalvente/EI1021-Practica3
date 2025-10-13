@@ -44,8 +44,9 @@ class HiloServidorSockets implements Runnable {
 				// Extrae la operación y sus parámetros
 
 				switch (operacion) {
+				
 					case "0":
-						// ...
+						
 						break;
 
 					case "1": { // Devuelve una lista de reservas de un usuario
