@@ -1,11 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-23">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-20">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/saracalvente/proyectos/eclipse/adfinplus_all/mvn/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar" sourcepath="/Users/saracalvente/proyectos/eclipse/adfinplus_all/mvn/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/saracalvente/proyectos/eclipse/adfinplus_all/mvn/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3-javadoc.jar!/"/>
+			<attribute name="test" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.skyscreamer"/>
+			<attribute name="maven.artifactId" value="jsonassert"/>
+			<attribute name="maven.version" value="1.5.3"/>
+			<attribute name="maven.scope" value="test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Users/saracalvente/proyectos/eclipse/adfinplus_all/mvn/org/junit/jupiter/junit-jupiter-api/5.12.2/junit-jupiter-api-5.12.2.jar" sourcepath="/Users/saracalvente/proyectos/eclipse/adfinplus_all/mvn/org/junit/jupiter/junit-jupiter-api/5.12.2/junit-jupiter-api-5.12.2-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
+			<attribute name="javadoc_location" value="jar:file:/Users/saracalvente/proyectos/eclipse/adfinplus_all/mvn/org/junit/jupiter/junit-jupiter-api/5.12.2/junit-jupiter-api-5.12.2-javadoc.jar!/"/>
+			<attribute name="maven.groupId" value="org.junit.jupiter"/>
+			<attribute name="maven.artifactId" value="junit-jupiter-api"/>
+			<attribute name="maven.version" value="5.12.2"/>
+			<attribute name="maven.scope" value="test"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
