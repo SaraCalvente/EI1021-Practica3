@@ -47,33 +47,74 @@ public class AuxiliarClienteSockets {
 		parser = new JSONParser();
 	} // end constructor
 
-
-	private JSONObject communicate(String message) {
+	/**
+	 * Envia la petición con las variables necesarias en formato JSONString
+	 * y recibe la respuesta del solución en el mismo formato.
+	 * @param 	message		el mensaje enviado
+	 * @return 	response	el mensaje recibido
+	 */
+	private String communicate(String message) {
 		String response = null;
-		JSONObject jsonResponse = new JSONObject();
 		try {
 			mySocket.sendMessage(message);
 			response = mySocket.receiveMessage();
-			if (response == "CLOSE")
-				mySocket.close();
 		} catch (IOException ex) {
 			ex.printStackTrace();
 			System.out.println("Error de comunicación con el servidor.");
         }
-		if (response != null) {
-			try {
-				Object o = parser.parse(response);
-			
-				jsonResponse = (JSONObject) o;
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				System.out.println("Error al parsear.");
-			}
+		return response;
+	}
+
+	/**
+	 * Saca un JSONArray del mensaje recibido
+	 * @param 	response	el mensaje recibido del servidor
+	 * @return				un JSONArray con la respuesta del servidor
+	 */
+	private JSONArray parseJSONArray(String response) {
+		JSONArray jsonResponse = new JSONArray();
+		try {
+			jsonResponse = (JSONArray) parser.parse(response);
+		} catch (ParseException ex) {
+			System.out.println("Error al parsear: ");
+			ex.printStackTrace();
 		}
-		
 		return jsonResponse;
 	}
 
+	/**
+	 * Saca un JSONObject del mensaje recibido
+	 * @param 	response	el mensaje recibido del servidor
+	 * @return				un JSONObject con la respuesta del servidor
+	 */
+	private JSONObject parseJSONObject(String response) {
+		JSONObject jsonResponse = new JSONObject();
+		try {
+			jsonResponse = (JSONObject) parser.parse(response);
+		} catch (ParseException ex) {
+			System.out.println("Error al parsear: ");
+			ex.printStackTrace();
+		}
+		return jsonResponse;
+	}
+	
+	/**
+	 * Todas las funciones de este tipo funcionan igual
+	 * 
+	 * 1
+	 * Crea un JSONObject con las variables necesarias para la petición específica
+	 * 
+	 * 2
+	 * Lo transforma en String con el formato JSONString
+	 * 
+	 * 3
+	 * Lo envía al servidor y recibe la respuesta con la función communicate
+	 * 
+	 * 4
+	 * Lo parsea a JSONObject o JSONArray con la función, según lo que se necesite
+	 * 
+	 * 5
+	 * Devuelve el resultado
+	 */
 	@SuppressWarnings("unchecked")
 	public JSONArray listaReservasUsuario(String codUsuario) {
 		// IMPLEMENTADO
@@ -82,11 +123,10 @@ public class AuxiliarClienteSockets {
 		jsonMessage.put("codUsuario", codUsuario);
 		String message = jsonMessage.toJSONString();
 		
-		JSONObject jsonResponse = communicate(message);
+		String response = communicate(message);
+		JSONArray jsonResponse = parseJSONArray(response);
 		
-		JSONArray reservasUsuario = (JSONArray) jsonResponse.get("reservasUsuario");
-		
-		return reservasUsuario; // cambiar por el retorno correcto	
+		return jsonResponse;
 	} // end listaReservasUsuario
 	
 	@SuppressWarnings("unchecked")
@@ -97,10 +137,10 @@ public class AuxiliarClienteSockets {
 		jsonMessage.put("actividad", actividad);
 		String message = jsonMessage.toJSONString();
 		
-		JSONObject jsonResponse = communicate(message);
+		String response = communicate(message);
+		JSONArray jsonResponse = parseJSONArray(response);
 		
-		JSONArray plazasActividad = (JSONArray) jsonResponse.get("plazasActividad");
-		return plazasActividad; // cambiar por el retorno correcto
+		return jsonResponse;
 	} // end listaPlazasDisponibles
 
 
@@ -115,10 +155,10 @@ public class AuxiliarClienteSockets {
 		jsonMessage.put("hora", hora);
 		String message = jsonMessage.toJSONString();
 		
-		JSONObject jsonResponse = communicate(message);
+		String response = communicate(message);
+		JSONObject jsonResponse = parseJSONObject(response);
 		
-		JSONObject reserva = (JSONObject) jsonResponse.get("reserva");
-		return reserva; // cambiar por el retorno correcto
+		return jsonResponse;
 	} // end hazReserva
 
 
@@ -133,10 +173,10 @@ public class AuxiliarClienteSockets {
 		jsonMessage.put("nuevaHora", nuevaHora);
 		String message = jsonMessage.toJSONString();
 		
-		JSONObject jsonResponse = communicate(message);
+		String response = communicate(message);
+		JSONObject jsonResponse = parseJSONObject(response);
 		
-		JSONObject reserva = (JSONObject) jsonResponse.get("reserva");
-		return reserva; // cambiar por el retorno correcto
+		return jsonResponse;
 	} // end modificaReserva
 
 	@SuppressWarnings("unchecked")
@@ -148,12 +188,11 @@ public class AuxiliarClienteSockets {
 		jsonMessage.put("codReserva", codReserva);
 		String message = jsonMessage.toJSONString();
 		
-		JSONObject jsonResponse = communicate(message);
+		String response = communicate(message);
+		JSONObject jsonResponse = parseJSONObject(response);
 		
-		JSONObject reserva = (JSONObject) jsonResponse.get("reserva");
-		return reserva; // cambiar por el retorno correcto
-
-	} // cancelaReserva
+		return jsonResponse;
+	} // end cancelaReserva
 
 
 	/**
@@ -166,6 +205,14 @@ public class AuxiliarClienteSockets {
 		jsonMessage.put("operacion", 0);
 		String message = jsonMessage.toJSONString();
 		
-		communicate(message);
-	} // end done 
+		String response = communicate(message);
+		
+		if (response.equals("FIN"))
+			try {
+				mySocket.close();
+			} catch (IOException ex) {
+				System.out.println("Error al cerrar el cliente: ");
+				ex.printStackTrace();
+			}
+	} // end cierraSesion
 } //end class

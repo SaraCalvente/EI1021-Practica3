@@ -28,6 +28,7 @@
 		public static void main(String[] args) {
 			int serverPort = 12345;    // puerto por defecto
 			ServerSocket myConnectionSocket = null;
+			System.out.println(args[0]);
 			gestor = new GestorReservas(); // Crea el gestor que, a su vez, crea/sobreescribe el fichero de reservas
 	
 			if (args.length == 1 )

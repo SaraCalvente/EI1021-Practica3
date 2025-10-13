@@ -1,5 +1,6 @@
 package cliente;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -143,26 +144,47 @@ public class ClienteSockets {
 
     // ========= Métodos auxiliares para pedir datos =========
 
-    private static String pedirNombreActividad(Scanner teclado, String pregunta) {
-        System.out.println(pregunta);
-        return teclado.nextLine();
+    private static String pedirNombreActividad(Scanner teclado, String pregunta) { // pide el nombre de la actividad por teclado
+    	String actividad;
+    	System.out.println(pregunta);
+   		actividad = teclado.nextLine();
+    	return actividad;
     }
-
-    private static long pedirHora(Scanner teclado, String pregunta) {
-        long hora;
-        System.out.println(pregunta);
-        do {
-            System.out.print("Dame una hora (0-23): ");
-            hora = teclado.nextLong();
-        } while (hora < 0 || hora > 23);
-        teclado.nextLine();
-        return hora;
+    
+    private static long pedirHora(Scanner teclado, String pregunta) { // pide hora por teclado, param pregunta es para reutilizar la función en contextos diferentes
+    	long hora = 0;
+    	System.out.println(pregunta);
+    	do {
+    		System.out.println("Dame una hora (0-23): ");
+    		boolean valido = false; 
+    		while (!valido) {
+    			System.out.println(pregunta);
+    			try {
+    				hora = teclado.nextLong();
+    	        	valido = true;
+    	        } catch (InputMismatchException e) {
+    	        	System.out.println("Entrada no válida. Introduce un número.");
+    	        	teclado.nextLine(); // limpiar el buffer
+    	        }
+    		}
+    	} while (hora < 0 || 23 < hora);
+    	return hora;
     }
-
-    private static long pedirCodReserva(Scanner teclado, String pregunta) {
-        System.out.println(pregunta);
-        long codReserva = teclado.nextLong();
-        teclado.nextLine();
-        return codReserva;
+    
+    private static long pedirCodReserva(Scanner teclado, String pregunta) { // pide codReserva por teclado, param pregunta es para reutilizar la función en contextos diferentes
+    	long codReserva = 0;
+        boolean valido = false;
+        while (!valido) {
+        	System.out.println(pregunta);
+        	try {
+        		codReserva = teclado.nextLong();
+        		valido = true;
+        	} catch (InputMismatchException e) {
+        		System.out.println("Entrada no válida. Introduce un número.");
+        		teclado.nextLine(); // limpiar el buffer
+        	}
+        }
+    	return codReserva;
     }
+    
 }

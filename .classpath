@@ -6,10 +6,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="ReservasSockets/src"/>
-	<classpathentry kind="lib" path="ReservasSockets/lib/json-simple-1.1.1.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="ReservasSockets/lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="ReservasSockets/bin"/>
 </classpath>

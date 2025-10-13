@@ -19,8 +19,8 @@ import comun.MyStreamSocket;
 class HiloServidorSockets implements Runnable {
 
 
-	final private MyStreamSocket myDataSocket;
-	final private GestorReservas gestor;
+	private MyStreamSocket myDataSocket;
+	private GestorReservas gestor;
 
 	/**
 	 * Construye el objeto a ejecutar por la hebra para servir a un cliente
@@ -43,16 +43,18 @@ class HiloServidorSockets implements Runnable {
 		try {
 			while (!done) {
 				String peticion = myDataSocket.receiveMessage();
-	            if (peticion == null) break; 
 
+	            if (peticion == null) break; 
 	            JSONObject jsonPeticion = (JSONObject) parser.parse(peticion);
-	            operacion = (String) jsonPeticion.get("operacion");
+	            operacion = jsonPeticion.get("operacion").toString();
 
 	            JSONObject respuesta = new JSONObject();
 	            JSONArray arrayRespuesta = new JSONArray();
 				switch (operacion) {
 				
 				case "0": 
+					gestor.guardaDatos();
+					myDataSocket.sendMessage("FIN");
                     done = true;
                     break;
 
@@ -64,7 +66,7 @@ class HiloServidorSockets implements Runnable {
                 }
 
                 case "2": { // Listar plazas disponibles
-                    String nombreActividad = (String) jsonPeticion.get("nombreActividad");
+                    String nombreActividad = jsonPeticion.get("actividad").toString();
                     arrayRespuesta = gestor.listaPlazasDisponibles(nombreActividad);
                     myDataSocket.sendMessage(arrayRespuesta.toJSONString());
                     break;
@@ -72,7 +74,7 @@ class HiloServidorSockets implements Runnable {
 
                 case "3": { // Hacer reserva
                     String codUsuario = (String) jsonPeticion.get("codUsuario");
-                    String nombreActividad = (String) jsonPeticion.get("nombreActividad");
+                    String nombreActividad = (String) jsonPeticion.get("actividad");
                     DiaSemana dia = DiaSemana.valueOf((String) jsonPeticion.get("dia"));
                     long hora = (long) jsonPeticion.get("hora");
 
@@ -84,8 +86,8 @@ class HiloServidorSockets implements Runnable {
                 case "4": { // Modificar reserva
                     String codUsuario = (String) jsonPeticion.get("codUsuario");
                     long codReserva = (long) jsonPeticion.get("codReserva");
-                    DiaSemana dia = DiaSemana.valueOf((String) jsonPeticion.get("dia"));
-                    long hora = (long) jsonPeticion.get("hora");
+                    DiaSemana dia = DiaSemana.valueOf((String) jsonPeticion.get("nuevoDia"));
+                    long hora = (long) jsonPeticion.get("nuevaHora");
 
                     respuesta = gestor.modificaReserva(codUsuario, codReserva, dia, hora);
                     myDataSocket.sendMessage(respuesta.toJSONString());
